@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from firebase_admin import credentials, auth
-from celery_worker import predict_breathability, predict_textile_classification, predict_drape
+from celery_worker import predict_breathability, predict_textile_classification, predict_drape_rigidity
 
 app = FastAPI()
 
@@ -109,21 +109,21 @@ async def predict_textile_classification_method(user_data: str = Depends(verify_
     return JSONResponse(content=body, status_code=200)
 
 
-@app.get("/predict-drape")
-async def predict_drape_method(user_data: str = Depends(verify_token),
-                               Class: float = 0,
+@app.get("/predict-drape-rigidity")
+async def predict_drape_rigidity_method(user_data: str = Depends(verify_token),
                                Height:float = 0,
                                Density: int = 0,
-                               Composition: int = 0,
-                               Thread: float = 0,
+                               Consist: int = 0,
+                               Thread: int = 0,
                                is_fabric: int = 0,
                                is_knitwear: int = 1):
     
-    drape = predict_drape.delay([Class, Height, Density, Composition, 
+    prediction = predict_drape_rigidity.delay([Height, Density, Consist, 
                                  Thread, is_fabric, is_knitwear]).get()
 
     body = {
-        'drape': drape
+        'drape': prediction[0],
+        'rigidity': prediction[1]
     }
 
     return JSONResponse(content=body, status_code=200)

@@ -1,9 +1,9 @@
 from celery import Celery
 from breathability import predict_breathability_class
 from textile_classification import predict_textile_class
-from drape import predict_drape_value
+from drape import predict_drape_rigidity_value
 
-celery_app = Celery('celery_worker', broker='redis://localhost:6379/0', backend='redis://localhost:6379/0')
+celery_app = Celery('celery_worker', broker='redis://redis:6379/0', backend='redis://redis:6379/0')
 
 @celery_app.task(name="predict")
 def predict(img):
@@ -25,7 +25,7 @@ def predict_textile_classification(img):
     return textile_classification_result
 
 @celery_app.task(name="predict_drape")
-def predict_drape(params):
-    drape_result = predict_drape_value(params)
+def predict_drape_rigidity(params):
+    drape_result = predict_drape_rigidity_value(params)
     
     return drape_result
